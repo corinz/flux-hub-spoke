@@ -1,0 +1,514 @@
+apiVersion: config.kubernetes.io/v1
+kind: ResourceList
+items:
+- apiVersion: kpt.dev/v1
+  kind: Kptfile
+  metadata:
+    name: istio
+    annotations:
+      config.kubernetes.io/local-config: "true"
+      config.kubernetes.io/index: '0'
+      config.kubernetes.io/path: 'istio/Kptfile'
+      internal.config.kubernetes.io/index: '0'
+      internal.config.kubernetes.io/path: 'istio/Kptfile'
+      internal.config.kubernetes.io/seqindent: 'compact'
+  upstream:
+    type: git
+    git:
+      repo: https://github.com/corinz/flux-hub-spoke
+      directory: /2.pkg/istio
+      ref: main
+    updateStrategy: resource-merge
+  upstreamLock:
+    type: git
+    git:
+      repo: https://github.com/corinz/flux-hub-spoke
+      directory: /2.pkg/istio
+      ref: main
+      commit: 42c2c57ea048b185241448f892a565f0f23b714d
+  info:
+    description: sample description
+- apiVersion: v1
+  kind: Namespace
+  metadata: # kpt-merge: /istio-system
+    name: istio-system
+    annotations:
+      internal.kpt.dev/upstream-identifier: '|Namespace|default|istio-system'
+      config.kubernetes.io/index: '0'
+      config.kubernetes.io/path: 'istio/istio-base.yaml'
+      internal.config.kubernetes.io/index: '0'
+      internal.config.kubernetes.io/path: 'istio/istio-base.yaml'
+      internal.config.kubernetes.io/seqindent: 'compact'
+- apiVersion: source.toolkit.fluxcd.io/v1beta2
+  kind: HelmRepository
+  metadata: # kpt-merge: istio-system/istio
+    name: istio
+    namespace: istio-system
+    annotations:
+      internal.kpt.dev/upstream-identifier: 'source.toolkit.fluxcd.io|HelmRepository|istio-system|istio'
+      config.kubernetes.io/index: '1'
+      config.kubernetes.io/path: 'istio/istio-base.yaml'
+      internal.config.kubernetes.io/index: '1'
+      internal.config.kubernetes.io/path: 'istio/istio-base.yaml'
+      internal.config.kubernetes.io/seqindent: 'compact'
+  spec:
+    interval: 5m
+    url: https://istio-release.storage.googleapis.com/charts
+- apiVersion: helm.toolkit.fluxcd.io/v2beta2
+  kind: HelmRelease
+  metadata: # kpt-merge: istio-system/istio-base
+    name: istio-base
+    namespace: istio-system
+    annotations:
+      internal.kpt.dev/upstream-identifier: 'helm.toolkit.fluxcd.io|HelmRelease|istio-system|istio-base'
+      config.kubernetes.io/index: '2'
+      config.kubernetes.io/path: 'istio/istio-base.yaml'
+      internal.config.kubernetes.io/index: '2'
+      internal.config.kubernetes.io/path: 'istio/istio-base.yaml'
+      internal.config.kubernetes.io/seqindent: 'compact'
+  spec:
+    interval: 10m
+    timeout: 5m
+    chart:
+      spec:
+        chart: base
+        version: '1.20.*'
+        sourceRef:
+          kind: HelmRepository
+          name: istio
+        interval: 5m
+    releaseName: istio-base
+    install:
+      remediation:
+        retries: 3
+    upgrade:
+      remediation:
+        retries: 3
+    test:
+      enable: false
+    driftDetection:
+      mode: enabled
+      ignore:
+      # ignore Horizontal Pod Autoscaling
+      - paths: ["/spec/replicas"]
+        target:
+          kind: Deployment
+    values:
+      # set istio "default" revision
+      defaultRevision: default
+- apiVersion: v1
+  kind: Namespace
+  metadata: # kpt-merge: /istio-ingress
+    name: istio-ingress
+    annotations:
+      internal.kpt.dev/upstream-identifier: '|Namespace|default|istio-ingress'
+      config.kubernetes.io/index: '0'
+      config.kubernetes.io/path: 'istio/istio-ingress.yaml'
+      internal.config.kubernetes.io/index: '0'
+      internal.config.kubernetes.io/path: 'istio/istio-ingress.yaml'
+      internal.config.kubernetes.io/seqindent: 'compact'
+- apiVersion: helm.toolkit.fluxcd.io/v2beta2
+  kind: HelmRelease
+  metadata: # kpt-merge: istio-ingress/istio-ingress
+    name: istio-ingress
+    namespace: istio-ingress
+    annotations:
+      internal.kpt.dev/upstream-identifier: 'helm.toolkit.fluxcd.io|HelmRelease|istio-ingress|istio-ingress'
+      config.kubernetes.io/index: '1'
+      config.kubernetes.io/path: 'istio/istio-ingress.yaml'
+      internal.config.kubernetes.io/index: '1'
+      internal.config.kubernetes.io/path: 'istio/istio-ingress.yaml'
+      internal.config.kubernetes.io/seqindent: 'compact'
+  spec:
+    interval: 10m
+    timeout: 5m
+    chart:
+      spec:
+        chart: gateway
+        version: '1.20.*'
+        sourceRef:
+          kind: HelmRepository
+          name: istio
+          namespace: istio-system
+        interval: 5m
+    releaseName: istio-ingress
+    install:
+      remediation:
+        retries: 3
+    upgrade:
+      remediation:
+        retries: 3
+    test:
+      enable: false
+    driftDetection:
+      mode: enabled
+      ignore:
+      # ignore Horizontal Pod Autoscaling
+      - paths: ["/spec/replicas"]
+        target:
+          kind: Deployment
+    values:
+      service:
+        # Static IP created by terraform
+        loadBalancerIP: # PATCH ME
+- apiVersion: helm.toolkit.fluxcd.io/v2beta2
+  kind: HelmRelease
+  metadata: # kpt-merge: istio-system/istiod
+    name: istiod
+    namespace: istio-system
+    annotations:
+      internal.kpt.dev/upstream-identifier: 'helm.toolkit.fluxcd.io|HelmRelease|istio-system|istiod'
+      config.kubernetes.io/index: '0'
+      config.kubernetes.io/path: 'istio/istiod.yaml'
+      internal.config.kubernetes.io/index: '0'
+      internal.config.kubernetes.io/path: 'istio/istiod.yaml'
+      internal.config.kubernetes.io/seqindent: 'compact'
+  spec:
+    interval: 10m
+    timeout: 5m
+    chart:
+      spec:
+        chart: istiod
+        version: '1.20.*'
+        sourceRef:
+          kind: HelmRepository
+          name: istio
+        interval: 5m
+    releaseName: istiod
+    install:
+      remediation:
+        retries: 3
+    upgrade:
+      remediation:
+        retries: 3
+    test:
+      enable: false
+    driftDetection:
+      mode: enabled
+      ignore:
+      # ignore Horizontal Pod Autoscaling
+      - paths: ["/spec/replicas"]
+        target:
+          kind: Deployment
+    values:
+- apiVersion: kustomize.config.k8s.io/v1beta1
+  kind: Kustomization
+  resources:
+  - istio-base.yaml
+  - istio-ingress.yaml
+  - istiod.yaml
+  metadata:
+    annotations:
+      config.kubernetes.io/index: '0'
+      config.kubernetes.io/path: 'istio/kustomization.yaml'
+      internal.config.kubernetes.io/index: '0'
+      internal.config.kubernetes.io/path: 'istio/kustomization.yaml'
+      internal.config.kubernetes.io/seqindent: 'wide'
+- apiVersion: v1
+  kind: ConfigMap
+  metadata: # kpt-merge: /kptfile.kpt.dev
+    name: kptfile.kpt.dev
+    annotations:
+      config.kubernetes.io/local-config: "true"
+      internal.kpt.dev/upstream-identifier: '|ConfigMap|default|kptfile.kpt.dev'
+      config.kubernetes.io/index: '0'
+      config.kubernetes.io/path: 'istio/package-context.yaml'
+      internal.config.kubernetes.io/index: '0'
+      internal.config.kubernetes.io/path: 'istio/package-context.yaml'
+      internal.config.kubernetes.io/seqindent: 'compact'
+  data:
+    name: example
+- apiVersion: kpt.dev/v1
+  kind: Kptfile
+  metadata:
+    name: podinfo
+    annotations:
+      config.kubernetes.io/local-config: "true"
+      config.kubernetes.io/index: '0'
+      config.kubernetes.io/path: 'podinfo/Kptfile'
+      internal.config.kubernetes.io/index: '0'
+      internal.config.kubernetes.io/path: 'podinfo/Kptfile'
+      internal.config.kubernetes.io/seqindent: 'compact'
+  upstream:
+    type: git
+    git:
+      repo: https://github.com/corinz/flux-hub-spoke
+      directory: /2.pkg/podinfo
+      ref: main
+    updateStrategy: resource-merge
+  upstreamLock:
+    type: git
+    git:
+      repo: https://github.com/corinz/flux-hub-spoke
+      directory: /2.pkg/podinfo
+      ref: main
+      commit: 42c2c57ea048b185241448f892a565f0f23b714d
+  info:
+    description: sample description
+- # Source: podinfo/templates/service.yaml
+  apiVersion: v1
+  kind: Service
+  metadata: # kpt-merge: /release-name-podinfo
+    name: release-name-podinfo
+    labels:
+      helm.sh/chart: podinfo-6.7.0
+      app.kubernetes.io/name: release-name-podinfo
+      app.kubernetes.io/version: "6.7.0"
+      app.kubernetes.io/managed-by: Helm
+    annotations:
+      internal.kpt.dev/upstream-identifier: '|Service|default|release-name-podinfo'
+      config.kubernetes.io/index: '0'
+      config.kubernetes.io/path: 'podinfo/build.yaml'
+      internal.config.kubernetes.io/index: '0'
+      internal.config.kubernetes.io/path: 'podinfo/build.yaml'
+      internal.config.kubernetes.io/seqindent: 'wide'
+  spec:
+    type: ClusterIP
+    ports:
+    - port: 9898
+      targetPort: http
+      protocol: TCP
+      name: http
+    - port: 9999
+      targetPort: grpc
+      protocol: TCP
+      name: grpc
+    selector:
+      app.kubernetes.io/name: release-name-podinfo
+- # Source: podinfo/templates/deployment.yaml
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata: # kpt-merge: /release-name-podinfo
+    name: release-name-podinfo
+    labels:
+      helm.sh/chart: podinfo-6.7.0
+      app.kubernetes.io/name: release-name-podinfo
+      app.kubernetes.io/version: "6.7.0"
+      app.kubernetes.io/managed-by: Helm
+    annotations:
+      internal.kpt.dev/upstream-identifier: 'apps|Deployment|default|release-name-podinfo'
+      config.kubernetes.io/index: '1'
+      config.kubernetes.io/path: 'podinfo/build.yaml'
+      internal.config.kubernetes.io/index: '1'
+      internal.config.kubernetes.io/path: 'podinfo/build.yaml'
+      internal.config.kubernetes.io/seqindent: 'wide'
+  spec:
+    replicas: 1
+    strategy:
+      type: RollingUpdate
+      rollingUpdate:
+        maxUnavailable: 1
+    selector:
+      matchLabels:
+        app.kubernetes.io/name: release-name-podinfo
+    template:
+      metadata:
+        labels:
+          app.kubernetes.io/name: release-name-podinfo
+        annotations:
+          prometheus.io/scrape: "true"
+          prometheus.io/port: "9898"
+      spec:
+        terminationGracePeriodSeconds: 30
+        containers:
+        - name: podinfo
+          image: "ghcr.io/stefanprodan/podinfo:6.7.0"
+          imagePullPolicy: IfNotPresent
+          command:
+          - ./podinfo
+          - --port=9898
+          - --cert-path=/data/cert
+          - --port-metrics=9797
+          - --grpc-port=9999
+          - --grpc-service-name=podinfo
+          - --level=info
+          - --random-delay=false
+          - --random-error=false
+          env:
+          - name: PODINFO_UI_COLOR
+            value: "#34577c"
+          ports:
+          - name: http
+            containerPort: 9898
+            protocol: TCP
+          - name: http-metrics
+            containerPort: 9797
+            protocol: TCP
+          - name: grpc
+            containerPort: 9999
+            protocol: TCP
+          livenessProbe:
+            exec:
+              command:
+              - podcli
+              - check
+              - http
+              - localhost:9898/healthz
+            initialDelaySeconds: 1
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+              - podcli
+              - check
+              - http
+              - localhost:9898/readyz
+            initialDelaySeconds: 1
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+            periodSeconds: 10
+          volumeMounts:
+          - name: data
+            mountPath: /data
+          resources:
+            limits: null
+            requests:
+              cpu: 1m
+              memory: 16Mi
+        volumes:
+        - name: data
+          emptyDir: {}
+- # Source: podinfo/templates/tests/grpc.yaml
+  apiVersion: v1
+  kind: Pod
+  metadata: # kpt-merge: /release-name-podinfo-grpc-test-9uzhr
+    name: release-name-podinfo-grpc-test-9uzhr
+    labels:
+      helm.sh/chart: podinfo-6.7.0
+      app.kubernetes.io/name: release-name-podinfo
+      app.kubernetes.io/version: "6.7.0"
+      app.kubernetes.io/managed-by: Helm
+    annotations:
+      "helm.sh/hook": test-success
+      "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+      sidecar.istio.io/inject: "false"
+      linkerd.io/inject: disabled
+      appmesh.k8s.aws/sidecarInjectorWebhook: disabled
+      internal.kpt.dev/upstream-identifier: '|Pod|default|release-name-podinfo-grpc-test-9uzhr'
+      config.kubernetes.io/index: '2'
+      config.kubernetes.io/path: 'podinfo/build.yaml'
+      internal.config.kubernetes.io/index: '2'
+      internal.config.kubernetes.io/path: 'podinfo/build.yaml'
+      internal.config.kubernetes.io/seqindent: 'wide'
+  spec:
+    containers:
+    - name: grpc-health-probe
+      image: stefanprodan/grpc_health_probe:v0.3.0
+      command: ['grpc_health_probe']
+      args: ['-addr=release-name-podinfo.default:9999']
+    restartPolicy: Never
+- # Source: podinfo/templates/tests/jwt.yaml
+  apiVersion: v1
+  kind: Pod
+  metadata: # kpt-merge: /release-name-podinfo-jwt-test-le4ex
+    name: release-name-podinfo-jwt-test-le4ex
+    labels:
+      helm.sh/chart: podinfo-6.7.0
+      app.kubernetes.io/name: release-name-podinfo
+      app.kubernetes.io/version: "6.7.0"
+      app.kubernetes.io/managed-by: Helm
+    annotations:
+      "helm.sh/hook": test-success
+      "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+      sidecar.istio.io/inject: "false"
+      linkerd.io/inject: disabled
+      appmesh.k8s.aws/sidecarInjectorWebhook: disabled
+      internal.kpt.dev/upstream-identifier: '|Pod|default|release-name-podinfo-jwt-test-le4ex'
+      config.kubernetes.io/index: '3'
+      config.kubernetes.io/path: 'podinfo/build.yaml'
+      internal.config.kubernetes.io/index: '3'
+      internal.config.kubernetes.io/path: 'podinfo/build.yaml'
+      internal.config.kubernetes.io/seqindent: 'wide'
+  spec:
+    containers:
+    - name: tools
+      image: giantswarm/tiny-tools
+      command:
+      - sh
+      - -c
+      - |
+        TOKEN=$(curl -sd 'test' ${PODINFO_SVC}/token | jq -r .token) &&
+        curl -sH "Authorization: Bearer ${TOKEN}" ${PODINFO_SVC}/token/validate | grep test
+      env:
+      - name: PODINFO_SVC
+        value: "release-name-podinfo.default:9898"
+    restartPolicy: Never
+- # Source: podinfo/templates/tests/service.yaml
+  apiVersion: v1
+  kind: Pod
+  metadata: # kpt-merge: /release-name-podinfo-service-test-zy3xa
+    name: release-name-podinfo-service-test-zy3xa
+    labels:
+      helm.sh/chart: podinfo-6.7.0
+      app.kubernetes.io/name: release-name-podinfo
+      app.kubernetes.io/version: "6.7.0"
+      app.kubernetes.io/managed-by: Helm
+    annotations:
+      "helm.sh/hook": test-success
+      "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+      sidecar.istio.io/inject: "false"
+      linkerd.io/inject: disabled
+      appmesh.k8s.aws/sidecarInjectorWebhook: disabled
+      internal.kpt.dev/upstream-identifier: '|Pod|default|release-name-podinfo-service-test-zy3xa'
+      config.kubernetes.io/index: '4'
+      config.kubernetes.io/path: 'podinfo/build.yaml'
+      internal.config.kubernetes.io/index: '4'
+      internal.config.kubernetes.io/path: 'podinfo/build.yaml'
+      internal.config.kubernetes.io/seqindent: 'wide'
+  spec:
+    containers:
+    - name: curl
+      image: curlimages/curl:7.69.0
+      command:
+      - sh
+      - -c
+      - |
+        curl -s ${PODINFO_SVC}/api/info | grep version
+      env:
+      - name: PODINFO_SVC
+        value: "release-name-podinfo.default:9898"
+    restartPolicy: Never
+- apiVersion: v1
+  kind: ConfigMap
+  metadata: # kpt-merge: /kptfile.kpt.dev
+    name: kptfile.kpt.dev
+    annotations:
+      config.kubernetes.io/local-config: "true"
+      internal.kpt.dev/upstream-identifier: '|ConfigMap|default|kptfile.kpt.dev'
+      config.kubernetes.io/index: '0'
+      config.kubernetes.io/path: 'podinfo/package-context.yaml'
+      internal.config.kubernetes.io/index: '0'
+      internal.config.kubernetes.io/path: 'podinfo/package-context.yaml'
+      internal.config.kubernetes.io/seqindent: 'compact'
+  data:
+    name: example
+- apiVersion: kpt.dev/v1
+  kind: Kptfile
+  metadata:
+    name: superpackage
+    annotations:
+      config.kubernetes.io/local-config: "true"
+      config.kubernetes.io/index: '0'
+      config.kubernetes.io/path: 'Kptfile'
+      internal.config.kubernetes.io/index: '0'
+      internal.config.kubernetes.io/path: 'Kptfile'
+      internal.config.kubernetes.io/seqindent: 'compact'
+  info:
+    description: sample description
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: kptfile.kpt.dev
+    annotations:
+      config.kubernetes.io/local-config: "true"
+      config.kubernetes.io/index: '0'
+      config.kubernetes.io/path: 'package-context.yaml'
+      internal.config.kubernetes.io/index: '0'
+      internal.config.kubernetes.io/path: 'package-context.yaml'
+      internal.config.kubernetes.io/seqindent: 'compact'
+  data:
+    name: example
