@@ -1,14 +1,15 @@
----
 # Source: podinfo/templates/service.yaml
 apiVersion: v1
 kind: Service
-metadata:
+metadata: # kpt-merge: /release-name-podinfo
   name: release-name-podinfo
   labels:
     helm.sh/chart: podinfo-6.7.0
     app.kubernetes.io/name: release-name-podinfo
     app.kubernetes.io/version: "6.7.0"
     app.kubernetes.io/managed-by: Helm
+  annotations:
+    internal.kpt.dev/upstream-identifier: '|Service|default|release-name-podinfo'
 spec:
   type: ClusterIP
   ports:
@@ -26,13 +27,15 @@ spec:
 # Source: podinfo/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
-metadata:
+metadata: # kpt-merge: /release-name-podinfo
   name: release-name-podinfo
   labels:
     helm.sh/chart: podinfo-6.7.0
     app.kubernetes.io/name: release-name-podinfo
     app.kubernetes.io/version: "6.7.0"
     app.kubernetes.io/managed-by: Helm
+  annotations:
+    internal.kpt.dev/upstream-identifier: 'apps|Deployment|default|release-name-podinfo'
 spec:
   replicas: 1
   strategy:
@@ -66,8 +69,8 @@ spec:
             - --random-delay=false
             - --random-error=false
           env:
-          - name: PODINFO_UI_COLOR
-            value: "#34577c"
+            - name: PODINFO_UI_COLOR
+              value: "#34577c"
           ports:
             - name: http
               containerPort: 9898
@@ -81,10 +84,10 @@ spec:
           livenessProbe:
             exec:
               command:
-              - podcli
-              - check
-              - http
-              - localhost:9898/healthz
+                - podcli
+                - check
+                - http
+                - localhost:9898/healthz
             initialDelaySeconds: 1
             timeoutSeconds: 5
             failureThreshold: 3
@@ -93,32 +96,32 @@ spec:
           readinessProbe:
             exec:
               command:
-              - podcli
-              - check
-              - http
-              - localhost:9898/readyz
+                - podcli
+                - check
+                - http
+                - localhost:9898/readyz
             initialDelaySeconds: 1
             timeoutSeconds: 5
             failureThreshold: 3
             successThreshold: 1
             periodSeconds: 10
           volumeMounts:
-          - name: data
-            mountPath: /data
+            - name: data
+              mountPath: /data
           resources:
             limits: null
             requests:
               cpu: 1m
               memory: 16Mi
       volumes:
-      - name: data
-        emptyDir: {}
+        - name: data
+          emptyDir: {}
 ---
 # Source: podinfo/templates/tests/grpc.yaml
 apiVersion: v1
 kind: Pod
-metadata:
-  name: release-name-podinfo-grpc-test-kxzbo
+metadata: # kpt-merge: /release-name-podinfo-grpc-test-9uzhr
+  name: release-name-podinfo-grpc-test-9uzhr
   labels:
     helm.sh/chart: podinfo-6.7.0
     app.kubernetes.io/name: release-name-podinfo
@@ -130,19 +133,20 @@ metadata:
     sidecar.istio.io/inject: "false"
     linkerd.io/inject: disabled
     appmesh.k8s.aws/sidecarInjectorWebhook: disabled
+    internal.kpt.dev/upstream-identifier: '|Pod|default|release-name-podinfo-grpc-test-9uzhr'
 spec:
   containers:
     - name: grpc-health-probe
       image: stefanprodan/grpc_health_probe:v0.3.0
       command: ['grpc_health_probe']
-      args:  ['-addr=release-name-podinfo.default:9999']
+      args: ['-addr=release-name-podinfo.default:9999']
   restartPolicy: Never
 ---
 # Source: podinfo/templates/tests/jwt.yaml
 apiVersion: v1
 kind: Pod
-metadata:
-  name: release-name-podinfo-jwt-test-3nnbj
+metadata: # kpt-merge: /release-name-podinfo-jwt-test-le4ex
+  name: release-name-podinfo-jwt-test-le4ex
   labels:
     helm.sh/chart: podinfo-6.7.0
     app.kubernetes.io/name: release-name-podinfo
@@ -154,6 +158,7 @@ metadata:
     sidecar.istio.io/inject: "false"
     linkerd.io/inject: disabled
     appmesh.k8s.aws/sidecarInjectorWebhook: disabled
+    internal.kpt.dev/upstream-identifier: '|Pod|default|release-name-podinfo-jwt-test-le4ex'
 spec:
   containers:
     - name: tools
@@ -165,15 +170,15 @@ spec:
           TOKEN=$(curl -sd 'test' ${PODINFO_SVC}/token | jq -r .token) &&
           curl -sH "Authorization: Bearer ${TOKEN}" ${PODINFO_SVC}/token/validate | grep test
       env:
-      - name: PODINFO_SVC
-        value: "release-name-podinfo.default:9898"
+        - name: PODINFO_SVC
+          value: "release-name-podinfo.default:9898"
   restartPolicy: Never
 ---
 # Source: podinfo/templates/tests/service.yaml
 apiVersion: v1
 kind: Pod
-metadata:
-  name: release-name-podinfo-service-test-adw6c
+metadata: # kpt-merge: /release-name-podinfo-service-test-zy3xa
+  name: release-name-podinfo-service-test-zy3xa
   labels:
     helm.sh/chart: podinfo-6.7.0
     app.kubernetes.io/name: release-name-podinfo
@@ -185,6 +190,7 @@ metadata:
     sidecar.istio.io/inject: "false"
     linkerd.io/inject: disabled
     appmesh.k8s.aws/sidecarInjectorWebhook: disabled
+    internal.kpt.dev/upstream-identifier: '|Pod|default|release-name-podinfo-service-test-zy3xa'
 spec:
   containers:
     - name: curl

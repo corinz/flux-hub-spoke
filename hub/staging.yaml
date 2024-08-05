@@ -14,7 +14,7 @@ spec:
   timeout: 5m
   prune: true
   wait: true
-  path: ./deploy/staging
+  path: ./4.deploy/staging
   sourceRef:
     kind: GitRepository
     name: flux-system

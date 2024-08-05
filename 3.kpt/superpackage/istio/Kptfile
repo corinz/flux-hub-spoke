@@ -1,22 +1,22 @@
 apiVersion: kpt.dev/v1
 kind: Kptfile
 metadata:
-  name: podinfo
+  name: istio
   annotations:
     config.kubernetes.io/local-config: "true"
 upstream:
   type: git
   git:
     repo: https://github.com/corinz/flux-hub-spoke
-    directory: /src/podinfo
+    directory: /2.pkg/istio
     ref: main
   updateStrategy: resource-merge
 upstreamLock:
   type: git
   git:
     repo: https://github.com/corinz/flux-hub-spoke
-    directory: /src/podinfo
+    directory: /2.pkg/istio
     ref: main
-    commit: 419ab10bb2693f251ea5612aa2d77c182679575a
+    commit: 42c2c57ea048b185241448f892a565f0f23b714d
 info:
   description: sample description
