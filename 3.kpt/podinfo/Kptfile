@@ -1,0 +1,22 @@
+apiVersion: kpt.dev/v1
+kind: Kptfile
+metadata:
+  name: podinfo
+  annotations:
+    config.kubernetes.io/local-config: "true"
+upstream:
+  type: git
+  git:
+    repo: https://github.com/corinz/flux-hub-spoke
+    directory: /src/podinfo
+    ref: main
+  updateStrategy: resource-merge
+upstreamLock:
+  type: git
+  git:
+    repo: https://github.com/corinz/flux-hub-spoke
+    directory: /src/podinfo
+    ref: main
+    commit: 419ab10bb2693f251ea5612aa2d77c182679575a
+info:
+  description: sample description

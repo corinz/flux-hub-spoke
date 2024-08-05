@@ -1,0 +1,5 @@
+apps:
+  podinfo:
+    enabled: true
+    target: ./../src/podinfo-stable
+    type: helm
