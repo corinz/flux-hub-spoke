@@ -14,7 +14,7 @@ spec:
   timeout: 5m
   prune: true
   wait: true
-  path: ./4.deploy/staging
+  path: ./3.kpt/superpackage
   sourceRef:
     kind: GitRepository
     name: flux-system
