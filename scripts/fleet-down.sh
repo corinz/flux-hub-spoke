@@ -8,6 +8,8 @@
 set -o errexit
 set -o pipefail
 
+export KIND_EXPERIMENTAL_PROVIDER=podman
+
 CLUSTER_HUB="flux-hub"
 echo "INFO - Deleting cluster ${CLUSTER_HUB}"
 

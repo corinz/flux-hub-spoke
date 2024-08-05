@@ -8,3 +8,6 @@ flux bootstrap github \
     --branch=main \
     --personal \
     --path=hub
+
+flux install --context kind-flux-production
+flux install --context kind-flux-staging
