@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+  name: internal-las1
+resources:
+- ../../src/podinfo/internal
+#- ../../src/argocd-crds/internal
+#- ../../src/podinfo/${TYPE}

@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: internal-las1
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: internal-las1
+  namespace: internal-las1
+spec:
+  interval: 1h
+  retryInterval: 3m
+  timeout: 5m
+  prune: true
+  wait: true
+  path: ./deploy/internal
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  kubeConfig:
+    secretRef:
+      name: cluster-kubeconfig
+  # substituted in the final YAML manifest, after kustomize build.
+  postBuild:
+    substitute:
+      REGION: las1
+      TYPE: internal
