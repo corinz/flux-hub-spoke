@@ -12,6 +12,6 @@ patches:
       name: podinfo
       namespace: default 
     spec:
-      valuesFrom:
-      - chartFileRef:
-          path: values-tenant.yaml
+#      valuesFrom:
+#      - chartFileRef:
+#          path: values-tenant.yaml
