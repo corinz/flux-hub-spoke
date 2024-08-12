@@ -15,12 +15,12 @@ echo "INFO - Deleting cluster ${CLUSTER_HUB}"
 
 kind delete cluster --name "${CLUSTER_HUB}"
 
-CLUSTER_STAGING="flux-staging"
+CLUSTER_STAGING="flux-tenant-12345"
 echo "INFO - Deleting cluster ${CLUSTER_STAGING}"
 
 kind delete cluster --name "${CLUSTER_STAGING}"
 
-CLUSTER_PRODUCTION="flux-production"
+CLUSTER_PRODUCTION="flux-internal-las1"
 echo "INFO - Deleting cluster ${CLUSTER_PRODUCTION}"
 
 kind delete cluster --name "${CLUSTER_PRODUCTION}"

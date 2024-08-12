@@ -28,14 +28,14 @@ kind create cluster --name "${CLUSTER_HUB}" \
 --image "kindest/node:${CLUSTER_VERSION}" \
 --wait 5m
 
-CLUSTER_STAGING="flux-staging"
+CLUSTER_STAGING="flux-tenant-12345"
 echo "INFO - Creating cluster ${CLUSTER_STAGING}"
 
 kind create cluster --name "${CLUSTER_STAGING}" \
 --image "kindest/node:${CLUSTER_VERSION}" \
 --wait 5m
 
-CLUSTER_PRODUCTION="flux-production"
+CLUSTER_PRODUCTION="flux-internal-las1"
 echo "INFO - Creating cluster ${CLUSTER_PRODUCTION}"
 
 kind create cluster --name "${CLUSTER_PRODUCTION}" \
@@ -46,15 +46,15 @@ echo "INFO - Creating kubeconfig secrets in the hub cluster"
 
 kubectl config use-context "kind-${CLUSTER_HUB}"
 
-kind get kubeconfig --internal --name ${CLUSTER_STAGING} > "${repo_root}/bin/staging.kubeconfig"
-kubectl --context "kind-${CLUSTER_HUB}" create ns staging
-kubectl --context "kind-${CLUSTER_HUB}" create secret generic -n staging cluster-kubeconfig \
---from-file=value="${repo_root}/bin/staging.kubeconfig"
+kind get kubeconfig --internal --name ${CLUSTER_STAGING} > "${repo_root}/bin/tenant-12345.kubeconfig"
+kubectl --context "kind-${CLUSTER_HUB}" create ns tenant-12345
+kubectl --context "kind-${CLUSTER_HUB}" create secret generic -n tenant-12345 cluster-kubeconfig \
+--from-file=value="${repo_root}/bin/tenant-12345.kubeconfig"
 
-kind get kubeconfig --internal --name ${CLUSTER_PRODUCTION} > "${repo_root}/bin/production.kubeconfig"
-kubectl --context "kind-${CLUSTER_HUB}" create ns production
-kubectl --context "kind-${CLUSTER_HUB}" create secret generic -n production cluster-kubeconfig \
---from-file=value="${repo_root}/bin/production.kubeconfig"
+kind get kubeconfig --internal --name ${CLUSTER_PRODUCTION} > "${repo_root}/bin/internal-las1.kubeconfig"
+kubectl --context "kind-${CLUSTER_HUB}" create ns internal-las1
+kubectl --context "kind-${CLUSTER_HUB}" create secret generic -n internal-las1 cluster-kubeconfig \
+--from-file=value="${repo_root}/bin/internal-las1.kubeconfig"
 
 echo "INFO - Clusters created successfully"
 

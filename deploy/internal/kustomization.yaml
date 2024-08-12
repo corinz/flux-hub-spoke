@@ -4,5 +4,3 @@ metadata:
   name: internal-las1
 resources:
 - ../../src/podinfo/internal
-#- ../../src/argocd-crds/internal
-#- ../../src/podinfo/${TYPE}
