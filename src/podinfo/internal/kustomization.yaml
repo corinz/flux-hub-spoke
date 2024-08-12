@@ -8,5 +8,6 @@ patches:
     kind: Deployment
     metadata:
       name: podinfo
+      namespace: podinfo
     spec:
       minReadySeconds: 4
