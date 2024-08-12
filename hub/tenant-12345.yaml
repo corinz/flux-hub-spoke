@@ -19,9 +19,6 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  kubeConfig:
-    secretRef:
-      name: cluster-kubeconfig
   postBuild:
     substitute:
       REGION: las1
