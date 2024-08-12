@@ -4,4 +4,3 @@ metadata:
   name: internal-las1
 resources:
 - ../../src/podinfo-helm-release/internal
-#- ../../src/podinfo/internal
