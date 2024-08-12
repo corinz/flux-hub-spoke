@@ -4,10 +4,14 @@ resources:
 - ../base
 patches:
 - patch: |
-    apiVersion: apps/v1
-    kind: Deployment
+    apiVersion: helm.toolkit.fluxcd.io/v2
+    kind: HelmRelease
     metadata:
       name: podinfo
-      namespace: podinfo
+      namespace: default
     spec:
-      minReadySeconds: 4
+      kubeConfig:
+        secretRef:
+          name: ${TYPE}-${REGION}/cluster-kubeconfig
+      values:
+        replicaCount: 3
